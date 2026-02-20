@@ -1,0 +1,28 @@
+#!/bin/sh
+
+FORMAT_FILE="/tmp/dwmblocks_mus_format"
+[ ! -f "$FORMAT_FILE" ] && echo "0" > "$FORMAT_FILE"
+read FORMAT < "$FORMAT_FILE"
+
+[ "$FORMAT" -eq 0 ] && META='{{ trunc(artist,17) }} - {{ trunc(title,20) }}|' \
+                    || META='{{ trunc(album,17) }} - {{ trunc(title,20) }}│'
+
+STATUS="$(playerctl status 2>/dev/null)"
+
+if [ "$STATUS" = "Playing" ]; then
+    ICON="❚❚ "
+elif [ "$STATUS" = "Paused" ]; then
+    ICON=" "
+else
+    ICON="⏹ |"
+fi
+
+echo "$ICON$(playerctl metadata --format "$META" 2>/dev/null)"
+
+case $BLOCK_BUTTON in
+    3) echo "$(( (FORMAT + 1) % 2 ))" > "$FORMAT_FILE" ;;
+    1) playerctl play-pause ;;
+    4) playerctl position 5+ ;;
+    5) playerctl position 5- ;; 
+esac
+

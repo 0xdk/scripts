@@ -1,0 +1,26 @@
+# !/bin/sh
+#
+case $BLOCK_BUTTON in
+    3) protonvpn-app >/dev/null 2>&1 & pkill -RTMIN+4 -f "$0" ;;
+    1) # Right click: show VPN status notification
+       if [ -n "$(ip addr show proton0 2>/dev/null | grep 'inet ')" ] || \
+          ip route show default 2>/dev/null | grep -q "proton0"; then
+           # VPN connected - try to get country from ProtonVPN CLI/logs
+           COUNTRY=$(protonvpn-cli status 2>/dev/null | grep -o 'NL\|US\|DE\|FR\|CH\|JP' | head -1 || echo "Unknown")
+           notify-send "VPN" "Connected via ProtonVPN ($COUNTRY)" || \
+           notify-send "VPN" "Connected (proton0 active)"
+       else
+           notify-send "VPN" "VPN Disconnected"
+       fi
+       pkill -RTMIN+4 -f "$0" ;;  # refresh block
+esac
+
+# VPN - proton0 
+if [ -n "$(ip addr show proton0 2>/dev/null | grep 'inet ')" ] || \
+   ip route show default 2>/dev/null | grep -q "proton0"; then
+    tunicon="🗝 │"
+else
+    tunicon="ꗃ │"
+fi 
+
+printf "%s%s\n" "$wifiicon" "$tunicon"

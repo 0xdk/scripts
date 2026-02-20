@@ -1,0 +1,35 @@
+#!/bin/bash
+
+
+if ! bluetoothctl show | grep -q "Powered: yes"; then
+    ICON="  │" 
+else
+    if bluetoothctl devices Connected | grep -q .; then
+        ICON=" │" 
+    else
+        ICON=" │"
+    fi
+fi
+case "$BLOCK_BUTTON" in
+    3)
+        if bluetoothctl show | grep -q "Powered: no"; then
+            bluetoothctl power on
+            sleep 1
+        fi
+        
+        st -e bluetoothctl &  
+        
+        notify-send "Bluetooth" "Opened Bluetoothctl : connect to B0:38:E2:9C:06:04 " & ;;
+     1) # Right click: show connected devices status
+        if bluetoothctl devices Connected | grep -q .; then
+          # Show connected device(s)
+            DEVICES=$(bluetoothctl devices Connected | awk '{print $3}' | paste -sd ', ')
+            notify-send "Bluetooth" "Connected: $DEVICES"
+        else
+            notify-send "Bluetooth" "No devices connected"
+        fi
+        ;;
+esac
+
+printf "%s\n" "$ICON"
+

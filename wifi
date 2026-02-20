@@ -1,0 +1,32 @@
+
+#!/bin/sh
+
+# Fallback for undefined variables
+[ -z "$TERMINAL" ] && TERMINAL="st" 
+[ -z "$EDITOR" ] && EDITOR="nvim"
+
+case $BLOCK_BUTTON in
+	1) setsid "$TERMINAL" -e nmtui >/dev/null 2>&1 & pkill -RTMIN+4 "${STATUSBAR:-dwmblocks}" ;;
+	2) notify-send "Network" "WiFi: UP | DOWN | OFF\nVPN: ON/OFF" ;;
+	3) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+# WiFi - wlp1s0
+if [ "$(cat /sys/class/net/wlp1s0/operstate 2>/dev/null)" = 'up' ]; then
+    wifiicon="󰤨 │"
+elif [ -d /sys/class/net/wlp1s0 ]; then
+    wifiicon="[--] "
+else
+    wifiicon="󰖪 "
+fi
+
+# # VPN - proton0 
+# if [ -n "$(ip addr show proton0 2>/dev/null | grep 'inet ')" ] || \
+#    ip route show default 2>/dev/null | grep -q "proton0"; then
+#     tunicon="🗝 │"
+# else
+#     tunicon="ꗃ"
+# fi
+#
+printf "%s%s\n" "$wifiicon" "$tunicon"
+

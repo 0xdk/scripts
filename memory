@@ -1,0 +1,14 @@
+#!/bin/bash
+
+[ -z "$TERMINAL" ] && TERMINAL="st" 
+[ -z "$EDITOR" ] && EDITOR="nvim"
+
+
+mem="$(free -h | awk '/^Mem:/{print $3 "/" $2}')"
+swap="$(free -h | awk '/^Swap:/{print $3 "/" $2}')"
+case "$BLOCK_BUTTON" in
+    1) notify-send "Memory usage" "RAM:  $mem Swap: $swap" ;;
+    2) setsid -f "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+printf "%s│" " $mem"

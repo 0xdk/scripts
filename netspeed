@@ -1,0 +1,25 @@
+#!/bin/sh
+
+STATE_FILE="/tmp/net-speed.state"
+INTERFACE=$(ip route | awk '/default/ {print $5; exit}')
+
+[ -z "$INTERFACE" ] && printf " 0.00MB\n" && exit 0
+
+# Read previous stats
+if [ -f "$STATE_FILE" ]; then
+    read PREV_RX < "$STATE_FILE"
+else
+    PREV_RX=0
+fi
+
+RX_NOW=$(cat /sys/class/net/$INTERFACE/statistics/rx_bytes 2>/dev/null)
+
+# Calculate MB/s
+RX_MB=$(awk "BEGIN {printf \"%.2f\", ($RX_NOW - $PREV_RX) / 1024 / 1024}")
+
+[ "${RX_MB#-}" != "$RX_MB" ] && RX_MB="0.00"
+
+echo "$RX_NOW" > "$STATE_FILE"
+
+printf " %.2fMB\n" "$RX_MB"
+
